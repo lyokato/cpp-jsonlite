@@ -1,0 +1,202 @@
+#!/usr/bin/env perl 
+
+use strict;
+use warnings;
+
+CPP::Package::Starter::Shell->run;
+exit;
+
+package CPP::Package::Starter::Shell;
+
+use Term::ReadLine;
+
+sub new {
+    my $class = shift;
+    my $self = bless {
+        _term =>  Term::ReadLine->new('cppsh'),
+    }, $class;
+}
+
+sub run {
+    my $proto = shift;
+    my $self = ref($proto) ? $proto : $proto->new;
+
+    while (1) {
+        my $command = $self->ask_command();
+        last if (!$command || $command->isa("CPP::Package::Starter::Command::Exit")); 
+        $command->execute($self->{_term});
+    }
+    print "bye!\n";
+}
+
+sub ask_command {
+    my $self = shift;
+    my $answer = $self->{_term}->readline("cppsh > ");
+    return $self->get_input_command($answer);
+}
+
+sub get_input_command {
+    my ($self, $answer) = @_;
+    return CPP::Package::Starter::CommandParser->parse_input_answer($answer);
+}
+
+package CPP::Package::Starter::CommandParser;
+
+sub parse_input_answer {
+    my ($class, $answer) = @_;
+
+    if ($answer =~ s/^(\~)?([^\s]+)//) {
+        my $polling = $1 ? 1 : 0;
+        my $command = $2;
+        my $options = $answer || "";
+        if (!$command || $command eq 'help') {
+            return CPP::Package::Starter::Command::Help->new(
+                polling => 0, 
+                options => '',
+            );
+        }
+        elsif ($command eq 'exit' || $command eq 'quit') {
+            return CPP::Package::Starter::Command::Exit->new(
+                polling => 0, 
+                options => $options,
+            );
+        }
+        elsif ($command eq 'test') {
+            return CPP::Package::Starter::Command::Test->new(
+                polling => $polling, 
+                options => $options,
+            );
+        }
+    } else {
+        return CPP::Package::Starter::Command::Help->new(
+            polling => 0, 
+            options => ''
+        );
+    }
+
+}
+
+package CPP::Package::Starter::Command;
+
+use Getopt::Long qw(GetOptionsFromString :config no_ignore_case);
+
+sub new {
+    my ($class, %args) = @_;
+    my $self = bless {
+        polling => $args{polling} 
+    }, $class;
+    $self->init();
+    $self->parse_options($args{options});
+    return $self;
+}
+
+sub init { 
+    # template method
+}
+
+sub options { return +{}; }
+
+sub parse_options {
+    my ($self, $options) = @_;
+    my $ret = GetOptionsFromString($options, %{ $self->options });
+    return $ret;
+}
+
+sub execute { die "abstract method" }
+
+package CPP::Package::Starter::Command::Help;
+use base qw(CPP::Package::Starter::Command);
+sub execute { 
+    my $self = shift;
+    my $term = shift;
+    print <<EOF;
+
+ Commands:
+   exit  - quit shell
+   quit  - quit shell
+   test  - build and test
+   ~test - automatically build and test when files would be updated
+   
+EOF
+}
+
+package CPP::Package::Starter::Command::Test;
+use base qw(CPP::Package::Starter::Command);
+use FindBin;
+use IO::Dir;
+
+sub init {
+    my $self = shift;
+    $self->{verbose} = 0;
+}
+
+sub options {
+    my $self = shift;
+    return +{
+        'verbose|v' => \$self->{verbose},
+    };
+}
+sub execute {
+    my $self = shift;
+    my $term = shift;
+
+    my $interrupted = 0;
+    $SIG{INT} = sub {
+        $interrupted = 1;
+        $SIG{INT}  = 'DEFAULT'; 
+    };
+
+    $self->do_build_and_test();
+
+    while (!$interrupted) {
+        sleep 5;
+        if ($self->find_updated_file()) {
+            $self->do_build_and_test();
+        }
+    }
+
+}
+
+sub find_updated_file {
+    my $self = shift;
+    return 0;
+}
+
+sub do_build_and_test {
+    my $self = shift;
+    my $command = "cmake .. -DCMAKE_BUILD_TYPE=Debug";
+    my $build_dir = "$FindBin::Bin/../build";
+    unless (-e $build_dir) {
+        mkdir($build_dir, 0755) or die $!;
+    }
+    chdir $build_dir or die $!;
+    print $command, "\n";
+    system($command);
+    print "make\n";
+    system("make");
+    if ($self->{verbose}) {
+        my @tests = ();
+        my $tests_dir = IO::Dir->new('tests');
+        while (defined(my $filename = $tests_dir->read)) {
+            next if (-d $filename);
+            next if ($filename =~ /\.cmake$/);
+            next if ($filename eq 'Makefile');
+            push(@tests, $filename);
+        }
+        for my $test ( @tests ) {
+            my $test_command = sprintf("./tests/%s", $test);
+            print $test_command, "\n";
+            system(sprintf($test_command));
+        }
+    } else {
+        print "make test\n";
+        system("make test");
+    }
+}
+
+package CPP::Package::Starter::Command::Exit;
+use base qw(CPP::Package::Starter::Command);
+sub execute { }
+
+1;
+__END__
