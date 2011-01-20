@@ -35,6 +35,11 @@ pretty format support
  INSTALL
 =======================================================================
 
+This is header-only library.
+So, copy jsonlite.h into your project directory is the easiest way.
+
+or,
+
 1. cd build
 2. cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
 
