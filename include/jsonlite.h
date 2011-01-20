@@ -230,7 +230,7 @@ class json_visitor : public boost::static_visitor<std::string> {
     while (true) {
       os << "\"" << escape_json_string(iter->first) << "\":";
       value = iter->second;
-      os << boost::apply_visitor(json_visitor(), value);
+      os << boost::apply_visitor(*this, value);
       ++iter;
       if (iter != t.children_.end())
         os << ",";
@@ -247,7 +247,7 @@ class json_visitor : public boost::static_visitor<std::string> {
     std::vector<json_value>::const_iterator iter = t.children_.begin();
     while (true) {
       value = *iter;
-      os << boost::apply_visitor(json_visitor(), value);
+      os << boost::apply_visitor(*this, value);
       ++iter;
       if (iter != t.children_.end())
         os << ",";
