@@ -1,5 +1,6 @@
 #include "jsonlite.h"
 #include <gtest/gtest.h>
+#include <sstream>
 
 using namespace jsonlite;
 
@@ -34,5 +35,9 @@ TEST(jsonliteTest, testBuildObject)
                                     ("SubKey2", "SubValue2"));
   json = obj.str();
   EXPECT_EQ("{\"AAA\":\"\\\"aaa\",\"Array\":[\"Hoge\",\"Foo\",false],\"BBB\":\"\\n\\\\m\",\"Foo\":true,\"Hoge\":\"Hoge\",\"Obj\":{\"SubKey1\":\"SubValue1\",\"SubKey2\":\"SubValue2\"}}", json);
+
+  std::ostringstream os;
+  os << obj;
+  EXPECT_EQ("{\"AAA\":\"\\\"aaa\",\"Array\":[\"Hoge\",\"Foo\",false],\"BBB\":\"\\n\\\\m\",\"Foo\":true,\"Hoge\":\"Hoge\",\"Obj\":{\"SubKey1\":\"SubValue1\",\"SubKey2\":\"SubValue2\"}}", os.str());
 }
 

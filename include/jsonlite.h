@@ -148,6 +148,7 @@ class json_bool {
 
 class json_array {
   friend class json_visitor;
+  friend std::ostream& operator<<(std::ostream& os, const json_array& array);
  public:
   json_array() { }
   json_array(const json_value& value) {
@@ -185,6 +186,7 @@ private:
 
 class json_object {
   friend class json_visitor;
+  friend std::ostream& operator<<(std::ostream& os, const json_object& obj);
  public:
   json_object() { }
   json_object(const std::string& key, const json_value& value) {
@@ -262,14 +264,30 @@ class json_visitor : public boost::static_visitor<std::string> {
   std::string operator()(const json_bool&   b) const { return b() ? "true" : "false"; }
 };
 
-std::string to_json(const json_object& obj) {
+std::string
+to_json(const json_object& obj) {
   json_value value(obj);
   return boost::apply_visitor(json_visitor(), value);
 }
 
-std::string to_json(const json_array& array) {
+std::string
+to_json(const json_array& array) {
   json_value value(array);
   return boost::apply_visitor(json_visitor(), value);
+}
+
+std::ostream&
+operator<<(std::ostream& os, const json_object& obj)
+{
+  os << obj.str();
+  return os;
+}
+
+std::ostream&
+operator<<(std::ostream& os, const json_array& array)
+{
+  os << array.str();
+  return os;
 }
 
 }  // end of namespace
