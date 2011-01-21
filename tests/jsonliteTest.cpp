@@ -23,5 +23,16 @@ TEST(jsonliteTest, testBuildObject)
                  ("Obj", json_object("SubKey1", "SubValue1")
                                     ("SubKey2", "SubValue2")).str();
   EXPECT_EQ("{\"AAA\":\"\\\"aaa\",\"Array\":[\"Hoge\",\"Foo\",false],\"BBB\":\"\\n\\\\m\",\"Foo\":true,\"Hoge\":\"Hoge\",\"Obj\":{\"SubKey1\":\"SubValue1\",\"SubKey2\":\"SubValue2\"}}", json);
+
+  json_object obj = 
+      json_object("Hoge", "Hoge")
+                 ("Foo", true)
+                 ("AAA", "\"aaa")
+                 ("BBB", "\\n\\m")
+                 ("Array", json_array("Hoge")("Foo")(false))
+                 ("Obj", json_object("SubKey1", "SubValue1")
+                                    ("SubKey2", "SubValue2"));
+  json = obj.str();
+  EXPECT_EQ("{\"AAA\":\"\\\"aaa\",\"Array\":[\"Hoge\",\"Foo\",false],\"BBB\":\"\\n\\\\m\",\"Foo\":true,\"Hoge\":\"Hoge\",\"Obj\":{\"SubKey1\":\"SubValue1\",\"SubKey2\":\"SubValue2\"}}", json);
 }
 
