@@ -6,5 +6,5 @@ INCLUDE_DIRECTORIES(${jsonlite_SOURCE_DIR}/include)
 # SET_TARGET_PROPERTIES(jsonlite_static PROPERTIES OUTPUT_NAME jsonlite)
 
 FILE(GLOB header_files ${jsonlite_SOURCE_DIR}/include/*)
-INSTALL(FILES ${header_files} DESTINATION include/jsonlite)
+INSTALL(FILES ${header_files} DESTINATION include)
 #INSTALL(TARGETS jsonlite DESTINATION lib)
