@@ -7,7 +7,7 @@
 =======================================================================
  DEPENDENCIES
 =======================================================================
-boost::variant
+<boost/variant.hpp>
 
 =======================================================================
  SYNOPSIS
@@ -15,14 +15,21 @@ boost::variant
 
 #include <jsonlite.h>
 #include <iostream>
+#include <sstream>
 #include <string>
 
-std::string json = json_object("Key1", "Value2")
+using namespace jsonlite;
+
+json_object json = json_object("Key1", "Value2")
                               ("Key2", true)
                               ("Key3", json_array("ArrayValue1")("ArrayValue2")("ArrayValue2"))
                               ("Key4", json_object("SubKey1", "SubValue1")
-                                                  ("SubKey2", "SubValue2")).str();
+                                                  ("SubKey2", "SubValue2"));
 
+std::string json_string = json.str();
+std::cout << json_string << std::endl;
+
+// or
 std::cout << json << std::endl;
 
 =======================================================================
@@ -36,7 +43,7 @@ pretty format support
 =======================================================================
 
 This is header-only library.
-So, copy jsonlite.h into your project directory is the easiest way.
+So, copying jsonlite.h into your project directory is the easiest way.
 
 or,
 

@@ -25,6 +25,7 @@ THE SOFTWARE.
 #ifndef _JSONLITE_H_
 #define _JSONLITE_H_
 #include <string>
+#include <cctype>
 #include <map>
 #include <vector>
 #include <sstream>
@@ -63,12 +64,7 @@ escape_json_string(const std::string& s)
           u2 = *c++; --rest; 
           u3 = *c++; --rest;
           u4 = *c++; --rest;
-          if (
-             (  ('0' <= u1 && u1 <= '9') || ('a' <= u1 && u1 <= 'f') || ('A' <= u1 && u1 <= 'F') )
-          && (  ('0' <= u2 && u2 <= '9') || ('a' <= u2 && u2 <= 'f') || ('A' <= u2 && u2 <= 'F') )
-          && (  ('0' <= u3 && u3 <= '9') || ('a' <= u3 && u3 <= 'f') || ('A' <= u3 && u3 <= 'F') )
-          && (  ('0' <= u4 && u4 <= '9') || ('a' <= u4 && u4 <= 'f') || ('A' <= u4 && u4 <= 'F') )
-              ) {
+          if (isxdigit(u1) && isxdigit(u2) && isxdigit(u3) && isxdigit(u4)) {
             // OK
             os << "\\u" << u1 << u2 << u3 << u4;
             continue;
