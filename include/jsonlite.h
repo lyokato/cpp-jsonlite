@@ -25,11 +25,13 @@ THE SOFTWARE.
 #ifndef _JSONLITE_H_
 #define _JSONLITE_H_
 #include <string>
-#include <cctype>
 #include <map>
 #include <vector>
 #include <sstream>
 #include <boost/variant.hpp>
+
+#define IS_XDIGIT(u) \
+    (((u) >= '0' && (u) <= '9') || ((u) >= 'a' && (u) <= 'f') || ((u) >= 'A' && (u) <= 'F'))
 
 namespace jsonlite {
 
@@ -64,7 +66,7 @@ escape_json_string(const std::string& s)
           u2 = *c++; --rest; 
           u3 = *c++; --rest;
           u4 = *c++; --rest;
-          if (isxdigit(u1) && isxdigit(u2) && isxdigit(u3) && isxdigit(u4)) {
+          if (IS_XDIGIT(u1) && IS_XDIGIT(u2) && IS_XDIGIT(u3) && IS_XDIGIT(u4)) {
             // OK
             os << "\\u" << u1 << u2 << u3 << u4;
             continue;
